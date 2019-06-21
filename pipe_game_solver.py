@@ -1,25 +1,22 @@
-import sys
 import pprint as pp
 
 '''
 solves game to connect the dots with the same colors together
+no optimizations
 '''
 
 # dictionary of different colors and their beginning and end positions on the board
-color_dict = {'G': [[5, 7], [7 ,7]],
-              'Y': [[2, 1], [1, 6]],
-              'B': [[7, 1], [5, 4]],
-              'R': [[1, 7], [4, 7]],
-              'O': [[3, 1], [7, 2]],
-              'C': [[4, 2], [8, 7]],
-              'P': [[0, 8], [2, 2]]}
+color_dict = {'G': [[0, 2], [2, 0]],
+              'Y': [[0, 0], [2, 2]]}
 
 # list of colors
 color_list = list(color_dict.keys())
 
 # size of board
-b_size = 9
+b_size = 3
 
+# flag
+win = False
 
 def main():
     # initializing board size and location of dots on board
@@ -36,10 +33,16 @@ def main():
     board[color_dict[color_list[0]][0][0]][color_dict[color_list[0]][0][1]] = '_'
     colors(board, color_dict[color_list[0]][0], 0)
 
+    if not win:
+        print('No possible solution')
+
 
 # finds path from one colored dot to the same colored dot
 # can be optimized according to how the game works, but will do that later
 def colors(board, tile, color):
+
+    # for modifying flag
+    global win
 
     # checking if the current tile is out of bounds
     if (tile[0] < 0) or (tile[0] > (b_size - 1)) or (tile[1] < 0) or (tile[1] > (b_size - 1)):
@@ -60,8 +63,9 @@ def colors(board, tile, color):
             board[color_dict[color_list[color + 1]][0][0]][color_dict[color_list[color + 1]][0][1]] = color_list[color + 1]
         # all colors have been connected
         else:
-            print('DONE! (HOPEFULLY)')
+            print('DONE!')
             pp.pprint(board)
+            win = True
 
     # checks if square is empty
     elif board[tile[0]][tile[1]] == '_':
