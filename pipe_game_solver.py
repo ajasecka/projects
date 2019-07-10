@@ -6,14 +6,17 @@ no optimizations
 '''
 
 # dictionary of different colors and their beginning and end positions on the board
-color_dict = {'G': [[0, 2], [2, 0]],
-              'Y': [[0, 0], [2, 2]]}
+color_dict = {'G': [[0, 2], [3, 1]],
+              'Y': [[0, 4], [3, 3]],
+              'B': [[1, 2], [4, 2]],
+              'R': [[0, 0], [4, 1]],
+              'O': [[1, 4], [4, 3]]}
 
 # list of colors
 color_list = list(color_dict.keys())
 
 # size of board
-b_size = 3
+b_size = 5
 
 # flag
 win = False
@@ -41,12 +44,23 @@ def main():
 # can be optimized according to how the game works, but will do that later
 def colors(board, tile, color):
 
+    # print(color_list[color])
+    # pp.pprint(board)
+    # print()
+
     # for modifying flag
     global win
 
     # checking if the current tile is out of bounds
     if (tile[0] < 0) or (tile[0] > (b_size - 1)) or (tile[1] < 0) or (tile[1] > (b_size - 1)):
         return
+
+    # optimizations
+    # if      (tile[0] - 1 > 0 and board[tile[0] - 1][tile[1]] == color_list[color]) or \
+    #         (tile[0] + 1 < (b_size - 1) and board[tile[0] + 1][tile[1]] == color_list[color]) or \
+    #         (tile[1] - 1 > 0 and board[tile[0]][tile[1] - 1] == color_list[color]) or \
+    #         (tile[1] + 1 < (b_size - 1) and board[tile[0]][tile[1] + 1] == color_list[color]):
+    #     return
 
     # getting color positions from dictionary
     # makes code more readable
