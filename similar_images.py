@@ -11,7 +11,7 @@ no machine learning, but would prefer to if there was enough data
 def main():
     #getting images and checking for similar dimensions
     img1 = cv2.imread('C:/Users/Andrew/Desktop/images/same3.JPG')
-    img2 = cv2.imread('C:/Users/Andrew/Desktop/images/no2.JPG')
+    img2 = cv2.imread('C:/Users/Andrew/Desktop/images/no1.JPG')
     if img1.shape != img2.shape:
         raise Exception('Image dimensions are not the same')
 
@@ -42,8 +42,8 @@ def main():
         print('Images are different')
 
 if __name__ == '__main__':
-    #main()
-    xx = 8
-    yy = 8
-    arr = [[int(max(abs(x - (xx / 2)), abs(y - (yy / 2)))) for x in range(xx)] for y in range(yy)]
-    pp.pprint(arr)
+    main()
+    #xx = 8
+    #yy = 8
+    #arr = [[int(max(abs(x - (xx / 2)), abs(y - (yy / 2)))) for x in range(xx)] for y in range(yy)]
+    #pp.pprint(arr)
