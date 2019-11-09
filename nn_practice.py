@@ -6,83 +6,86 @@ import random
 import matplotlib.pyplot as plt
 
 
-# class definitions
-# not being used
-class Model:
-    def __init__(self, bias, weight):
-        self.bias = bias
-        self.weight = weight
-
-    def __call__(self, inputs):
-        print(f'inputs: {inputs}')
-        print(f'weight: {self.weight}')
-        print(f'output: {np.matmul(inputs, self.weight)}')
-
-        # change 5 to size of layer
-        return [np.matmul(inputs, self.weight) + self.bias] * 5
-
-
-learning_rate = .0001
+learning_rate = .001
 n = 100
 epoch = 100
 
 
+# sigmoid function
 def sigmoid(x):
+    # print(1/(1 + np.exp(-x)))
     return 1/(1 + np.exp(-x))
 
 
+# derivative of sigmoid function
 def sig_div(x):
     return np.exp(-x) / (1 + np.exp(-x))**2
 
 
-# change in error
-def error_change(target, predicted):
-    return target - predicted
-
-
-def sse(data, labels, w, b):
-    return np.sum(((data * w + b) - labels)**2)
+# sum of squares error
+def sse(data, data2, labels, w1, w2, w21, w22, b):
+    return np.sum(((data * w1 + data2 * w21 + (data * w2) + data2 * w22 + b) - labels)**2) / (2 * n)
 
 
 def main():
-    # creating random data with outputs (labels) being the square of the value
+    # creating randomized data
     np.random.seed(1)
-    data = np.random.random_sample(100) * 10
+    data = np.random.random_sample(n) * 100
+    data2 = np.random.random_sample(n) * 100
     labels = data * data
+    labels2 = data + data2
 
     # setting weights and bias
-    w1 = np.random.rand()
-    w2 = np.random.rand()
+    w11 = np.random.rand()
+    w12 = np.random.rand()
+    w21 = np.random.rand()
+    w22 = np.random.rand()
     b = np.random.rand()
 
+    # non-matrix training for layman understanding of backpropagation
     for i in range(epoch):
         for j in range(n):
-            output = (data[j] * w1) + b
+            '''
+            # 1 INPUT, 2 LAYERS
+            a = (data[j] * w11) + (data[j]**2 * w12) + b
+            output = sigmoid(data[j] * w11) + sigmoid(data[j]**2 * w12) + sigmoid(b)
+            # output = sigmoid((data[j] * w1) + (data[j]**2 * w2) + b)
 
             # backpropagation
-            w1 = w1 + learning_rate * error_change(labels[j], output) * data[j]
-            b = b + learning_rate * error_change(labels[j], output) * 1
+            # w1 = w1 - (output - labels[j]) * learning_rate * data[j]
+            w11 = w11 - learning_rate * (a - labels[j]) * output * (sigmoid(data[j] * w11))
+            # w2 = w2 - (output - labels[j]) * learning_rate * data[j]
+            w12 = w12 - learning_rate * (a - labels[j]) * output * (sigmoid(data[j]**2 * w12))
+            # b = b - (output - labels[j]) * learning_rate * 1
+            b = b - learning_rate * (a - labels[j]) * output * sigmoid(1)
+            '''
 
-        error = sse(data, labels, w1, b)
-        print(f'iteration: {i} --- error: {error}')
+            # 2 INPUTS, 2 LAYERS
+            output = (data[j] * w11 + data2[j] * w21) + (data[j] * w12 + data2[j] * w22) + b
+            a = sigmoid(data[j] * w11 + data2[j] * w21) + sigmoid(data[j] * w12 + data2[j] * w22) + sigmoid(b)
 
-    # plotting graph of data and trained network
-    print(f'weight: {w1} -- bias: {b}')
-    func = np.linspace(0, 10, 100)
-    plt.plot(list(data), list(labels), 'ro')
-    plt.plot(list(func), list(func * w1 + b))
-    plt.ylabel('some numbers')
-    plt.show()
+            # backpropagation
+            '''
+            Change in error with respect to w_xy: (predicted - target) *
+            activation function derivative of product sum plus bias (after activation function) *
+            output of node xy
+            Activation function is linear because regression problem, so derivative is 1
+            Learning rate applied to change in error
+            '''
+            w11 = w11 - learning_rate * (output - labels2[j]) * a * (sigmoid(data[j] * w11))
+            w12 = w12 - learning_rate * (output - labels2[j]) * a * (sigmoid(data[j] * w12))
+            w21 = w21 - learning_rate * (output - labels2[j]) * a * (sigmoid(data2[j] * w21))
+            w22 = w22 - learning_rate * (output - labels2[j]) * a * (sigmoid(data2[j] * w22))
+            b = b - learning_rate * (output - labels2[j]) * a * sigmoid(1)
+
+        error = sse(data, data2, labels2, w11, w12, w21, w22, b)
+        print(f'iteration: {i} --- error: {error} --- weight: {w11}, {w12}, {w21}, {w22}')
+
+    # adding in1 and in2 together
+    in1 = 20
+    in2 = 10
+    print(f'{in1} + {in2} = {(in1 * w11 + in2 * w21) + (in1 * w12 + in2 * w22) + b}')
 
 
 if __name__ == '__main__':
     main()
-
-    '''
-    nodes = np.array([[1, 2, 3]] * 3)
-    print(f'node: {nodes}')
-    weight = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
-    print(f'weight: {weight}')
-
-    print(np.matmul(weight, nodes))
-'''
