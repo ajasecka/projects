@@ -67,10 +67,9 @@ def create_board():
 
     # running pygame and waiting until X box is clicked
     while not flag:
+        pygame.draw.rect(display, COLOR_DICT[COLOR_LIST[color_choice[0]]], (0, y, x, SIZE))
+
         for event in pygame.event.get():
-
-            pygame.draw.rect(display, COLOR_DICT[COLOR_LIST[color_choice[0]]], (0, y, x, SIZE))
-
             # if board is clicked
             if event.type == MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
@@ -95,7 +94,6 @@ def create_board():
 
             if event.type == QUIT:
                 flag = True
-
         pygame.display.update()
 
     pygame.quit()
