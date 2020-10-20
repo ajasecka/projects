@@ -35,7 +35,7 @@ def get_winner(table, suit):
             if LIST_T.index(card[1:]) + len(LIST_NT) > best_card:
                 best_card = LIST_T.index(card[1:]) + len(LIST_NT)
                 winner = table.index(card)
-        if card[0] == suit:
+        elif card[0] == suit:
             if LIST_NT.index(card[1:]) > best_card:
                 best_card = LIST_NT.index(card[1:])
                 winner = table.index(card)
