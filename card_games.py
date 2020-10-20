@@ -23,16 +23,43 @@ import random
 
 
 # card postions for (T)rump list and (N)ot (T)rump list
-LIST_T = ['9', '10', 'J', 'Q', 'K', 'A', 'J2', 'J1']
+LIST_T = ['9', '10', 'Q', 'K', 'A', 'J2', 'J1']
 LIST_NT = ['9', '10', 'J', 'Q', 'K', 'A']
 
 
+def get_winner(table, suit):
+    best_card = -1
+    winner = None
+    for card in table:
+        if card[0] == 'T':
+            if LIST_T.index(card[1:]) + len(LIST_NT) > best_card:
+                best_card = LIST_T.index(card[1:]) + len(LIST_NT)
+                winner = table.index(card)
+        if card[0] == suit:
+            if LIST_NT.index(card[1:]) > best_card:
+                best_card = LIST_NT.index(card[1:])
+                winner = table.index(card)
+
+    return winner
+
+
+
+def get_suit(table):
+    return next(x[0] for x in table if x != '_')
+
 # chooses a card for the CPU to play
 # very simple choosing for now for testing
-# input(s): list (of player's cards)
-def choose_card(player):
-    pass
-
+# input(s): dictionary (of player's cards)
+def choose_card(player, suit):
+    if suit:
+        if player[suit]:
+            print(f'SAME SUIT: {suit + player[suit][0]}')
+            return suit + player[suit][0]
+    for diff_suit in player.keys():
+        if player[diff_suit]:
+            print(f'DIFF SUIT: {diff_suit + player[diff_suit][0]}')
+            return diff_suit + player[diff_suit][0]
+    raise Exception('SHOULD NOT HAVE GOTTEN HERE')
 
 # displays the probability of each card winning that current hand
 def cards_probability(you, unknown, table, trump):
@@ -45,8 +72,8 @@ def cards_probability(you, unknown, table, trump):
     Improvements: determine which card is best to play overall (in the hand) rather than just that specific turn
     '''
 
-    print(table)
-    first = None
+    print(f'table: {table}')
+    print(f'your hand: {you}')
 
     # if first card
     if table.count('_') == 4:
@@ -69,14 +96,20 @@ def cards_probability(you, unknown, table, trump):
                             if u_suit == trump:
                                 if LIST_T.index(u_card) > LIST_T.index(card):
                                     lose += 1
+                        # if suit is not trump
                         else:
                             if u_suit == trump:
                                 lose += 1
                             elif u_suit == suit:
                                 if LIST_NT.index(u_card) > LIST_NT.index(card):
                                     lose += 1
+                    # if you are not the first card
+                    else:
+                        pass
+                        # TODO GET SUIT TO FOLLOW, BEST CARD, WHO'S WINNING
+                        # if you have cards of the suit that needs to be followed
                     tot += 1
-            print(f'card: {suit}{card}: {tot - lose}/{tot}')
+            print(f'probability of winning: {suit}{card} - {tot - lose}/{tot} - {int((tot - lose) / tot * 100)}%')
 
 
 
@@ -116,56 +149,72 @@ def deal_cards():
 
 
 def main():
-    dealer = random.randint(0, 3)
     score = [0, 0]
 
-    while score[0] < 10 and score[1] < 10:
-        # initializations
-        table = ['_', '_', '_', '_']
-        # player order: you, opp1, partner, opp2 (for consistency with dealing)
-        remaining, players = deal_cards()
-        you = players[0]
-        print(f'remaining: {remaining}')
-        print(f'you: {you}')
-        print(f'partner: {players[2]}')
-        print(f'opp1: {players[1]}')
-        print(f'opp2: {players[3]}')
+    # initializations
+    table = ['_', '_', '_', '_']
+    # player order: you, opp1, partner, opp2 (for consistency with dealing)
+    remaining, players = deal_cards()
+    you = players[0]
+    print(f'remaining: {remaining}')
+    print(f'you: {you}')
+    print(f'partner: {players[2]}')
+    print(f'opp1: {players[1]}')
+    print(f'opp2: {players[3]}')
 
-        trump = remaining[0]
-        # list of which cards are still playable and which players definitely do not have this suit
-        unknown = {'T': [['J1', 'J2', 'A', 'K', 'Q', '10', '9'], [False, False, False]],
-                   '1': [['A', 'K', 'Q', '10', '9'], [False, False, False]],
-                   '2': [['A', 'K', 'Q', 'J', '10', '9'], [False, False, False]],
-                   '3': [['A', 'K', 'Q', 'J', '10', '9'], [False, False, False]]}
+    trump = remaining[0]
+    # list of which cards are still playable and which players definitely do not have this suit
+    # TODO IMPLEMENT LIST OF WHO HAS WHICH SUIT
+    unknown = {'T': [['J1', 'J2', 'A', 'K', 'Q', '10', '9'], [False, False, False]],
+               '1': [['A', 'K', 'Q', '10', '9'], [False, False, False]],
+               '2': [['A', 'K', 'Q', 'J', '10', '9'], [False, False, False]],
+               '3': [['A', 'K', 'Q', 'J', '10', '9'], [False, False, False]]}
 
-        # removing your cards and trump card from unknown cards
-        for suit in you.keys():
-            for your_cards in you[suit]:
-                unknown[suit][0].remove(your_cards)
+    # removing your cards and trump card from unknown cards
+    for suit in you.keys():
+        for your_cards in you[suit]:
+            unknown[suit][0].remove(your_cards)
 
-        # removing trump card from unknown cards
-        unknown['T'][0].remove(trump[1:])
-        print(f'unknown: {unknown}')
+    # removing trump card from unknown cards
+    unknown['T'][0].remove(trump[1:])
+    print(f'unknown: {unknown}')
 
-        # choose trump
-        # TODO LOGIC FOR CHOOSING TRUMP
-        trump = trump[0]
+    # choose trump
+    # TODO LOGIC FOR CHOOSING TRUMP
+    trump = trump[0]
 
-        # playing cards
-        # TODO LOOP HERE TO GO THROUGH ALL CARDS IN HAND (range(5))
-        for x in range(4):
-            whos_turn = (x + dealer) % 4  # TODO WRONG, NEED TO SEE WHO WON, ONLY USE THIS FOR FIRST CARD
-            if whos_turn == 0:
-                cards_probability(you, unknown, table, trump)
-                input('Choose card (dictionary key followed by value): ')
-                # TODO CHECK IF CARD EXISTS
-                # TODO ADD CARD TO PILE
-            else:
-                chosen_card = choose_card(players[whos_turn])
-                # table[whos_turn] = chosen_card
-                # unknown[chosen_card[0]].remove(chosen_card[1:])
+    # playing cards
+    dealer = 3
+    # TODO LOOP HERE TO GO THROUGH ALL CARDS IN HAND (range(5))
+    for x in range(4):
+        whos_turn = (dealer + x + 1) % 4
+        # if your turn
+        if whos_turn == 0:
+            cards_probability(you, unknown, table, trump)
+            chosen_card = None
+            while chosen_card is None:
+                chosen_card = input('Choose card (dictionary key followed by value): ')
+                if chosen_card[1:] not in you[chosen_card[0]]:
+                    chosen_card = None
+                    print('You do not have the card you chose - please pick again...')
+            you[chosen_card[0]].remove(chosen_card[1:])
 
-        # TODO DECIDE BEST CARD, ADD TO "HAND SCORE", REPEAT "PLAYING CARDS" UNTIL ALL CARDS ARE GONE
+        # CPU's turn; randomly choosing card
+        else:
+            chosen_card = choose_card(players[whos_turn], get_suit(table))
+            print(f'chosen_card: {chosen_card}')
+            # table[whos_turn] = chosen_card
+            # removing chosen_card from unknown
+            unknown[chosen_card[0]][0].remove(chosen_card[1:])
+            players[whos_turn][chosen_card[0]].remove(chosen_card[1:])
+
+        # adding card to table
+        table[whos_turn] = chosen_card
+
+    # TODO DECIDE BEST CARD, ADD TO "HAND SCORE", REPEAT "PLAYING CARDS" UNTIL ALL CARDS ARE GONE
+    print(f'Final table: {table}')
+    winner = get_winner(table, table[(dealer + 1) % 4][0])
+    print(f'Winner: {winner}')
 
 
 
