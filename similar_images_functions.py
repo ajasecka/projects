@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 from PIL import Image
 
 # creates an image of the difference between the two inputted images
@@ -42,3 +43,11 @@ def weigh_diff_img(img):
     pass
     # arr = [[int(max(abs(x - (img.shape[0] / 2)), abs(y - (img.shape[1] / 2)))) for x in range(img.shape[0])] for y in range(img.shape[1])]
     #return np.dot(arr, img)
+
+def retrieve_images(path):
+    files = os.listdir(path)
+    print(files)
+    images = []
+    for file in files:
+        images.append(cv2.imread(f'{path}{file}'))
+    return images
